@@ -13,6 +13,8 @@ jobs:
       run: |
         wget https://github.com/aquasecurity/tracee/releases/download/v0.19.0/tracee-x86_64.v0.19.0.tar.gz
         tar -xzvf tracee-x86_64.v0.19.0.tar.gz
+        pwd
+        ls -al
 
     - name: Install Dependencies
       run: |
@@ -21,7 +23,7 @@ jobs:
 
     - name: Run Tracee in background
       run: |
-        sudo ./tracee-ebpf/tracee-ebpf -o format:gob -o out-file:/tmp/tracee.gob &
+        sudo .dist/tracee-ebpf/tracee-ebpf -o format:gob -o out-file:/tmp/tracee.gob &
         echo "Tracee PID: $!"
       id: tracee
 
@@ -33,7 +35,9 @@ jobs:
     - name: Check Tracee output for dup syscall
       run: |
         # Wait a bit for Tracee to catch up
+        ls -al /tmp/tr*
         sleep 5
+        ls -al /tmp/tr*
         # This is a conceptual command; actual implementation may vary
         if grep -q "dup(" /tmp/tracee.gob; then
           echo "dup syscall detected successfully."
