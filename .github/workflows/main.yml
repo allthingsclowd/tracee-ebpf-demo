@@ -24,7 +24,7 @@ jobs:
 
     - name: Run Tracee in background
       run: |
-        sudo ./dist/tracee-ebpf -o format:gob -o out-file:/tmp/tracee.gob &
+        sudo ./dist/tracee-ebpf -f e=dup* -o format:gob -o out-file:/tmp/tracee.gob &
         echo "Tracee PID: $!"
       id: tracee
 
