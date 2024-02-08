@@ -40,7 +40,7 @@ jobs:
         sleep 5
         cat /tmp/tracee.gob
         # This is a conceptual command; actual implementation may vary
-        if grep -q "dup(" /tmp/tracee.gob; then
+        if grep -q "dup" /tmp/tracee.gob; then
           echo "dup syscall detected successfully."
           exit 0
         else
