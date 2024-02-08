@@ -9,17 +9,19 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Setup environment
+    - name: Download Tracee-eBPF Release
+      run: |
+        wget https://github.com/aquasecurity/tracee/releases/download/v0.19.0/tracee-x86_64.v0.19.0.tar.gz
+        tar -xzvf tracee-x86_64.v0.19.0.tar.gz
+
+    - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y git clang libelf-dev llvm libpcap-dev gcc make bison flex libbpf-dev
-        git clone https://github.com/aquasecurity/tracee.git
-        cd tracee/tracee-ebpf
-        make
+        sudo apt-get install -y libelf-dev libpcap-dev
 
     - name: Run Tracee in background
       run: |
-        sudo ./dist/tracee-ebpf -o format:gob -o out-file:/tmp/tracee.gob &
+        sudo ./tracee-ebpf/tracee-ebpf -o format:gob -o out-file:/tmp/tracee.gob &
         echo "Tracee PID: $!"
       id: tracee
 
