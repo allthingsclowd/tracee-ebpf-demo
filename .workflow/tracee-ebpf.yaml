@@ -1,1 +1,43 @@
+name: Tracee-eBPF Dup Detection
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git clang libelf-dev llvm libpcap-dev gcc make bison flex libbpf-dev
+        git clone https://github.com/aquasecurity/tracee.git
+        cd tracee/tracee-ebpf
+        make
+
+    - name: Run Tracee in background
+      run: |
+        sudo ./dist/tracee-ebpf -o format:gob -o out-file:/tmp/tracee.gob &
+        echo "Tracee PID: $!"
+      id: tracee
+
+    - name: Install Python and run script
+      run: |
+        sudo apt-get install -y python3
+        python3 -c 'import os; fd = os.dup(1); print(f"dup(1) succeeded, fd = {fd}")'
+
+    - name: Check Tracee output for dup syscall
+      run: |
+        # Wait a bit for Tracee to catch up
+        sleep 5
+        # This is a conceptual command; actual implementation may vary
+        if grep -q "dup(" /tmp/tracee.gob; then
+          echo "dup syscall detected successfully."
+          exit 0
+        else
+          echo "dup syscall not detected."
+          exit 1
+        fi
 
