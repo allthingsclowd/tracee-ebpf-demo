@@ -28,10 +28,12 @@ jobs:
         echo "Tracee PID: $!"
       id: tracee
 
-    - name: Install Python and run script
+
+    - name: Run eBPF Program
       run: |
         sudo apt-get install -y python3
-        python3 -c "from bcc import BPF; bpf_source = '''int hello_world(void *ctx) { bpf_trace_printk(\"--\\n\"); return 0; }'''; b = BPF(text=bpf_source); b.attach_kprobe(event=b.get_syscall_fnname('clone'), fn_name='hello_world'); count = 0; def print_event(cpu, data, size): global count; count += 1; print('--'); if count == 4: print('Success' if count == 4 else 'Fail'); b['events'].open_perf_buffer(print_event); while count < 4: try: b.perf_buffer_poll(); except KeyboardInterrupt: break"
+        python3 -c "from bcc import BPF; bpf_source = '''int hello_world(void *ctx) { bpf_trace_printk(\"--\\n\"); return 0; }'''; b = BPF(text=bpf_source); b.attach_kprobe(event=b.get_syscall_fnname('clone'), fn_name='hello_world'); count = 0; def print_event(cpu, data, size): global count; count += 1; print('--'); if count == 4: b.detach_kprobe(event=b.get_syscall_fnname('clone')); print('Success' if count == 4 else 'Fail'); b['events'].open_perf_buffer(print_event); while count < 4: b.perf_buffer_poll()"
+
 
     - name: Check Tracee output for dup syscall
       run: |
